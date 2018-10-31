@@ -45,6 +45,26 @@ class App extends React.Component {
         width: window.innerWidth
       }
     });
+    /* listen for shift key */
+    window.addEventListener("keydown", e => {
+      if (e.key === "Shift") {
+        dispatch({
+          type: "shift key change",
+          shiftKeyIsDown:
+            e.shiftKey /* if the user started the app with the shift key down, we need to make sure this still works */
+        });
+      }
+    });
+    /* listen for shift key */
+    window.addEventListener("keyup", e => {
+      if (e.key === "Shift") {
+        dispatch({
+          type: "shift key change",
+          shiftKeyIsDown:
+            e.shiftKey /* if the user started the app with the shift key down, we need to make sure this still works */
+        });
+      }
+    });
   }
 
   _onURLChanged() {
