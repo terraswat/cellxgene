@@ -23,7 +23,8 @@ import scaleLinear from "../../util/scaleLinear";
   responsive: state.responsive,
   colorRGB: _.get(state.controls, "colorRGB", null),
   opacityForDeselectedCells: state.controls.opacityForDeselectedCells,
-  selectionUpdate: _.get(state.controls, "crossfilter.updateTime", null)
+  selectionUpdate: _.get(state.controls, "crossfilter.updateTime", null),
+  shiftKeyIsDown: state.controls.shiftKeyIsDown
 }))
 class Graph extends React.Component {
   constructor(props) {
@@ -88,7 +89,8 @@ class Graph extends React.Component {
       crossfilter,
       selectionUpdate,
       colorRGB,
-      responsive
+      responsive,
+      shiftKeyIsDown
     } = this.props;
     const {
       reglRender,
@@ -102,7 +104,11 @@ class Graph extends React.Component {
       svg
     } = this.state;
 
-    if (reglRender && this.reglRenderState === "rendering" && mode !== "zoom") {
+    if (
+      reglRender &&
+      this.reglRenderState === "rendering" &&
+      (mode === "brush" && !shiftKeyIsDown)
+    ) {
       reglRender.cancel();
       this.reglRenderState = "paused";
     }
@@ -199,6 +205,14 @@ class Graph extends React.Component {
         this.graphPaddingTop
       );
       this.setState({ svg: newSvg, brush });
+    }
+
+    if (
+      shiftKeyIsDown &&
+      mode === "brush" &&
+      this.reglRenderState === "paused"
+    ) {
+      this.restartReglLoop();
     }
   }
 
@@ -333,7 +347,7 @@ class Graph extends React.Component {
   }
 
   render() {
-    const { dispatch, responsive, crossfilter } = this.props;
+    const { dispatch, responsive, crossfilter, shiftKeyIsDown } = this.props;
     const { mode } = this.state;
     return (
       <div id="graphWrapper">
@@ -394,7 +408,7 @@ class Graph extends React.Component {
                   <Button
                     className="bp3-button bp3-icon-select"
                     type="button"
-                    active={mode === "brush"}
+                    active={mode === "brush" && !shiftKeyIsDown}
                     onClick={() => {
                       this.setState({ mode: "brush" });
                     }}
@@ -404,7 +418,7 @@ class Graph extends React.Component {
                   <Button
                     type="button"
                     className="bp3-button bp3-icon-zoom-in"
-                    active={mode === "zoom"}
+                    active={mode === "zoom" || shiftKeyIsDown}
                     onClick={() => {
                       this.handleBrushDeselectAction();
                       this.restartReglLoop();
@@ -431,7 +445,7 @@ class Graph extends React.Component {
         >
           <div
             style={{
-              display: mode === "brush" ? "inherit" : "none"
+              display: mode === "brush" && !shiftKeyIsDown ? "inherit" : "none"
             }}
             id="graphAttachPoint"
           />
