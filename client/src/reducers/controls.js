@@ -47,7 +47,7 @@ const Controls = (
 
     colorAccessor: null,
     colorScale: null,
-    shiftKeyIsDown: false,
+    altKeyIsDown: false,
 
     opacityForDeselectedCells: 0.2,
     graphBrushSelection: null,
@@ -539,10 +539,10 @@ const Controls = (
         scatterplotYYaccessor: null
       };
 
-    case "shift key change":
+    case "alt key change":
       return {
         ...state,
-        shiftKeyIsDown: action.shiftKeyIsDown
+        altKeyIsDown: action.altKeyIsDown
       };
 
     default:

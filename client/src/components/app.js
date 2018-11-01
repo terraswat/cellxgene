@@ -47,21 +47,21 @@ class App extends React.Component {
     });
     /* listen for shift key */
     window.addEventListener("keydown", e => {
-      if (e.key === "Shift") {
+      if (e.key === "Alt") {
         dispatch({
-          type: "shift key change",
-          shiftKeyIsDown:
-            e.shiftKey /* if the user started the app with the shift key down, we need to make sure this still works */
+          type: "alt key change",
+          altKeyIsDown:
+            e.altKey /* if the user started the app with the shift key down, we need to make sure this still works */
         });
       }
     });
     /* listen for shift key */
     window.addEventListener("keyup", e => {
-      if (e.key === "Shift") {
+      if (e.key === "Alt") {
         dispatch({
-          type: "shift key change",
-          shiftKeyIsDown:
-            e.shiftKey /* if the user started the app with the shift key down, we need to make sure this still works */
+          type: "alt key change",
+          altKeyIsDown:
+            e.altKey /* if the user started the app with the shift key down, we need to make sure this still works */
         });
       }
     });
