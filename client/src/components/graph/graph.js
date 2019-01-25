@@ -346,6 +346,121 @@ class Graph extends React.Component {
     dispatch(actions.resetInterface());
   }
 
+  renderControls() {
+    const { dispatch, crossfilter, resettingInterface } = this.props
+    const { mode } = this.state;
+    const comp =
+      <div
+        style={{
+          position: "fixed",
+          right: 0,
+          top: 0
+        }}
+      >
+        <div
+          style={{
+            padding: 10,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "baseline"
+          }}
+        >
+          <Tooltip
+            content="Show only metadata and cells which are currently selected"
+            position="left"
+          >
+            <AnchorButton
+              type="button"
+              disabled={
+                crossfilter &&
+                (crossfilter.countFiltered() === 0 ||
+                crossfilter.countFiltered() === crossfilter.size())
+              }
+              style={{ marginRight: 10 }}
+              onClick={() => {
+                dispatch(actions.regraph());
+                dispatch({ type: "increment graph render counter" });
+              }}
+            >
+              subset to current selection
+            </AnchorButton>
+          </Tooltip>
+          <Tooltip
+            content="Reset cellxgene, clearing all selections"
+            position="left"
+          >
+            <AnchorButton
+              disabled={
+                false
+                /* world && universe ? worldEqUniverse(world, universe) : false */
+              }
+              type="button"
+              loading={resettingInterface}
+              intent="warning"
+              style={{ marginRight: 10 }}
+              onClick={this.resetInterface.bind(this)}
+            >
+              reset
+            </AnchorButton>
+          </Tooltip>
+          <div>
+            <div className="bp3-button-group">
+              <Tooltip content="Lasso cells" position="left">
+                <Button
+                  className="bp3-button bp3-icon-select"
+                  type="button"
+                  active={mode === "brush"}
+                  onClick={() => {
+                    this.setState({ mode: "brush" });
+                  }}
+                />
+              </Tooltip>
+              <Tooltip content="Pan and zoom" position="left">
+                <Button
+                  type="button"
+                  className="bp3-button bp3-icon-zoom-in"
+                  active={mode === "zoom"}
+                  onClick={() => {
+                    this.handleBrushDeselectAction();
+                    this.restartReglLoop();
+                    this.setState({ mode: "zoom" });
+                  }}
+                  style={{
+                      cursor: "pointer"
+                  }}
+                />
+              </Tooltip>
+            </div>
+          </div>
+        </div>
+      </div>
+    return comp
+  }
+
+  renderGraph() {
+    const { responsive } = this.props;
+    const { mode } = this.state;
+    const comp =
+      <React.Fragment>
+        <div
+          style={{
+            display: mode === "brush" ? "inherit" : "none"
+          }}
+          id="graphAttachPoint"
+        />
+        <div style={{ padding: 0, margin: 0 }}>
+          <canvas
+            width={responsive.width - this.graphPaddingRight}
+            height={responsive.height - this.graphPaddingTop}
+            ref={canvas => {
+                this.reglCanvas = canvas;
+            }}
+          />
+        </div>
+      </React.Fragment>
+    return comp
+  }
+
   render() {
     const {
       dispatch,
@@ -353,95 +468,14 @@ class Graph extends React.Component {
       crossfilter,
       resettingInterface
     } = this.props;
-
     const { mode } = this.state;
+    const controls = this.renderControls()
+    const graph = this.renderGraph()
     return (
       <div id="graphWrapper">
+        {controls}
         <div
-          style={{
-            position: "fixed",
-            right: 0,
-            top: 0
-          }}
-        >
-          <div
-            style={{
-              padding: 10,
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "baseline"
-            }}
-          >
-            <Tooltip
-              content="Show only metadata and cells which are currently selected"
-              position="left"
-            >
-              <AnchorButton
-                type="button"
-                disabled={
-                  crossfilter &&
-                  (crossfilter.countFiltered() === 0 ||
-                    crossfilter.countFiltered() === crossfilter.size())
-                }
-                style={{ marginRight: 10 }}
-                onClick={() => {
-                  dispatch(actions.regraph());
-                  dispatch({ type: "increment graph render counter" });
-                }}
-              >
-                subset to current selection
-              </AnchorButton>
-            </Tooltip>
-            <Tooltip
-              content="Reset cellxgene, clearing all selections"
-              position="left"
-            >
-              <AnchorButton
-                disabled={
-                  false
-                  /* world && universe ? worldEqUniverse(world, universe) : false */
-                }
-                type="button"
-                loading={resettingInterface}
-                intent="warning"
-                style={{ marginRight: 10 }}
-                onClick={this.resetInterface.bind(this)}
-              >
-                reset
-              </AnchorButton>
-            </Tooltip>
-            <div>
-              <div className="bp3-button-group">
-                <Tooltip content="Lasso cells" position="left">
-                  <Button
-                    className="bp3-button bp3-icon-select"
-                    type="button"
-                    active={mode === "brush"}
-                    onClick={() => {
-                      this.setState({ mode: "brush" });
-                    }}
-                  />
-                </Tooltip>
-                <Tooltip content="Pan and zoom" position="left">
-                  <Button
-                    type="button"
-                    className="bp3-button bp3-icon-zoom-in"
-                    active={mode === "zoom"}
-                    onClick={() => {
-                      this.handleBrushDeselectAction();
-                      this.restartReglLoop();
-                      this.setState({ mode: "zoom" });
-                    }}
-                    style={{
-                      cursor: "pointer"
-                    }}
-                  />
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
+          id='graphFlex'
           style={{
             zIndex: -9999,
             position: "fixed",
@@ -449,21 +483,7 @@ class Graph extends React.Component {
             right: 0
           }}
         >
-          <div
-            style={{
-              display: mode === "brush" ? "inherit" : "none"
-            }}
-            id="graphAttachPoint"
-          />
-          <div style={{ padding: 0, margin: 0 }}>
-            <canvas
-              width={responsive.width - this.graphPaddingRight}
-              height={responsive.height - this.graphPaddingTop}
-              ref={canvas => {
-                this.reglCanvas = canvas;
-              }}
-            />
-          </div>
+          {graph}
         </div>
       </div>
     );
