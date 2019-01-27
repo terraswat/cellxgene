@@ -113,7 +113,7 @@ class ContinuousLegend extends React.Component {
     if (
       prevProps.colorAccessor !== colorAccessor ||
       prevProps.responsive.height !== responsive.height ||
-      prevProps.responsive.width !== responsive.width
+      prevProps.responsive.graphWidth !== responsive.graphWidth
     ) {
       /* always remove it, if it's not continuous we don't put it back. */
       d3.select("#continuous_legend")

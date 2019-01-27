@@ -3,6 +3,7 @@ import React from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
 
+import * as globals from "../globals";
 import Container from "./framework/container";
 import LeftSideBar from "./leftsidebar";
 import Legend from "./continuousLegend";
@@ -19,7 +20,18 @@ class App extends React.Component {
     super(props);
     this.state = {};
   }
-
+  
+  resized() {
+    let graphWidth = window.innerWidth - globals.leftSidebarWidth
+    this.props.dispatch({
+      type: "window resize",
+      data: {
+        height: window.innerHeight,
+        graphWidth,
+      },
+    });
+  }
+  
   componentDidMount() {
     const { dispatch } = this.props;
 
@@ -30,22 +42,8 @@ class App extends React.Component {
     dispatch(actions.doInitialDataLoad(window.location.search));
 
     /* listen for resize events */
-    window.addEventListener("resize", () => {
-      dispatch({
-        type: "window resize",
-        data: {
-          height: window.innerHeight,
-          width: window.innerWidth
-        }
-      });
-    });
-    dispatch({
-      type: "window resize",
-      data: {
-        height: window.innerHeight,
-        width: window.innerWidth
-      }
-    });
+    window.addEventListener("resize", () => { this.resized() });
+    this.resized()
   }
 
   _onURLChanged() {
@@ -71,21 +69,14 @@ class App extends React.Component {
             loading cellxgene
           </div>
         ) : null}
-        <div>
+        <div id="sidebarAndDrawingArea" style={{display:"flex"}}>
           {loading ? null : <LeftSideBar />}
-          <div
-            style={{
-              padding: 15,
-              width: 1440 - 410 /* but responsive */,
-              marginLeft: 350 /* but responsive */
-            }}
-          >
-            {loading ? null : <Graph key={graphRenderCounter} />}
-            <Legend />
-          </div>
+          {loading ? null : <Graph key={graphRenderCounter} />}
         </div>
+        <Legend />
       </Container>
     );
+    // TODO do we need the key above? Seems to work without it.
   }
 }
 

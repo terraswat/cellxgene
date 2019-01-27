@@ -1,7 +1,7 @@
 // jshint esversion: 6
 const Responsive = (
   state = {
-    width: null,
+    graphWidth: null,
     height: null
   },
   action
@@ -10,7 +10,7 @@ const Responsive = (
     case "window resize":
       return {
         ...state,
-        width: action.data.width,
+        graphWidth: action.data.graphWidth,
         height: action.data.height
       };
     default:

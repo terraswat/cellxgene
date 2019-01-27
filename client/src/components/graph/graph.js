@@ -30,9 +30,7 @@ class Graph extends React.Component {
     super(props);
     this.count = 0;
     this.inverse = mat4.identity([]);
-    this.graphPaddingTop = 0;
     this.graphPaddingBottom = 45;
-    this.graphPaddingRight = globals.leftSidebarWidth;
     this.renderCache = {
       positions: null,
       colors: null
@@ -190,9 +188,9 @@ class Graph extends React.Component {
 
     if (
       prevProps.responsive.height !== responsive.height ||
-      prevProps.responsive.width !== responsive.width ||
+      prevProps.responsive.graphWidth !== responsive.graphWidth ||
       /* first time */
-      (responsive.height && responsive.width && !svg)
+      (responsive.height && responsive.graphWidth && !svg)
     ) {
       /* clear out whatever was on the div, even if nothing, but usually the brushes etc */
       d3.select("#graphAttachPoint")
@@ -202,7 +200,6 @@ class Graph extends React.Component {
         this.handleBrushSelectAction.bind(this),
         this.handleBrushDeselectAction.bind(this),
         responsive,
-        this.graphPaddingRight
       );
       this.setState({ svg: newSvg, brush });
     }
@@ -286,9 +283,9 @@ class Graph extends React.Component {
       // transform screen coordinates -> cell coordinates
       const invert = pin => {
         const x =
-          (2 * pin[0]) / (responsive.width - this.graphPaddingRight) - 1;
+          (2 * pin[0]) / responsive.graphWidth - 1;
         const y =
-          2 * (1 - pin[1] / (responsive.height - this.graphPaddingTop)) - 1;
+          2 * (1 - pin[1] / responsive.height) - 1;
         const pout = [
           x * inverse[14] * aspect + inverse[12],
           y * inverse[14] + inverse[13]
@@ -441,51 +438,36 @@ class Graph extends React.Component {
     const { responsive } = this.props;
     const { mode } = this.state;
     const comp =
-      <React.Fragment>
+      <div
+        id="graphCanvasWrap"
+        style={{width: responsive.graphWidth}}
+      >
         <div
+          id="graphAttachPoint"
           style={{
             display: mode === "brush" ? "inherit" : "none"
           }}
-          id="graphAttachPoint"
         />
-        <div style={{ padding: 0, margin: 0 }}>
-          <canvas
-            width={responsive.width - this.graphPaddingRight}
-            height={responsive.height - this.graphPaddingTop}
-            ref={canvas => {
-                this.reglCanvas = canvas;
-            }}
-          />
-        </div>
-      </React.Fragment>
+        <canvas
+          id="graphCanvas"
+          width={responsive.graphWidth}
+          height={responsive.height}
+          ref={canvas => {
+            this.reglCanvas = canvas;
+          }}
+        />
+      </div>
     return comp
   }
 
   render() {
-    const {
-      dispatch,
-      responsive,
-      crossfilter,
-      resettingInterface
-    } = this.props;
-    const { mode } = this.state;
     const controls = this.renderControls()
     const graph = this.renderGraph()
     return (
-      <div id="graphWrapper">
-        {controls}
-        <div
-          id='graphFlex'
-          style={{
-            zIndex: -9999,
-            position: "fixed",
-            top: 0,
-            right: 0
-          }}
-        >
-          {graph}
-        </div>
-      </div>
+        <React.Fragment>
+            {graph}
+            {controls}
+        </React.Fragment>
     );
   }
 }

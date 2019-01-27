@@ -32,8 +32,8 @@ class LeftSideBar extends React.Component {
 
     return (
       <div
+        id="leftSideBar"
         style={{
-          position: "fixed",
           backgroundColor: "white",
           /* x y blur spread color */
           boxShadow: "1px 0px 6px 2px rgba(153,153,153,0.4)"
