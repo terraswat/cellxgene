@@ -19,13 +19,11 @@ import scaleLinear from "../../util/scaleLinear";
   world: state.controls.world,
   universe: state.controls.universe,
   crossfilter: state.controls.crossfilter,
+  mode: state.toolBar.drawingMode,
   responsive: state.responsive,
   colorRGB: _.get(state.controls, "colorRGB", null),
   opacityForDeselectedCells: state.controls.opacityForDeselectedCells,
   selectionUpdate: _.get(state.controls, "crossfilter.updateTime", null),
-  mode: state.toolBar.drawingMode,
-  brush: state.toolBar.brush,
-  svg: state.toolBar.svg,
 }))
 class Graph extends React.Component {
   constructor(props) {
@@ -37,21 +35,21 @@ class Graph extends React.Component {
       positions: null,
       colors: null
     };
+    this.state = {
+      svg: null,
+      brush: null,
+    };
   }
 
-  componentDidMount() {
-    // setup canvas and camera
-    const camera = _camera(this.reglCanvas, { scale: true, rotate: false });
-    const regl = _regl(this.reglCanvas);
-
-    const drawPoints = _drawPoints(regl);
-
-    // preallocate buffers
-    const pointBuffer = regl.buffer();
-    const colorBuffer = regl.buffer();
-    const sizeBuffer = regl.buffer();
-
-    /* first time, but this duplicates above function, should be possile to avoid this */
+  restartReglLoop() {
+    const {
+      regl,
+      drawPoints,
+      sizeBuffer,
+      colorBuffer,
+      pointBuffer,
+      camera
+    } = this.state;
     const reglRender = regl.frame(() => {
       this.reglDraw(
         regl,
@@ -67,26 +65,59 @@ class Graph extends React.Component {
     this.reglRenderState = "rendering";
 
     this.setState({
+      reglRender
+    });
+  }
+
+  componentDidMount() {
+    // setup canvas and camera
+    const camera = _camera(this.reglCanvas, { scale: true, rotate: false });
+    const regl = _regl(this.reglCanvas);
+
+    const drawPoints = _drawPoints(regl);
+
+    // preallocate buffers
+    const pointBuffer = regl.buffer();
+    const colorBuffer = regl.buffer();
+    const sizeBuffer = regl.buffer();
+
+    /*
+    // first time, but this duplicates above function, should be possile to avoid this
+    const reglRender = regl.frame(() => {
+      this.reglDraw(
+        regl,
+        drawPoints,
+        sizeBuffer,
+        colorBuffer,
+        pointBuffer,
+        camera
+      );
+      camera.tick();
+    });
+
+    this.reglRenderState = "rendering";
+    */
+    this.setState({
       regl,
       drawPoints,
       pointBuffer,
       colorBuffer,
       sizeBuffer,
       camera,
-      reglRender
+      //reglRender
     });
+    // Allow the state to actually update.
+    setTimeout(this.restartReglLoop)
   }
 
   componentDidUpdate(prevProps) {
     const {
-      dispatch,
       world,
       crossfilter,
+      mode,
       selectionUpdate,
       colorRGB,
-      responsive,
-      mode,
-      svg,
+      responsive
     } = this.props;
     const {
       reglRender,
@@ -96,6 +127,7 @@ class Graph extends React.Component {
       pointBuffer,
       colorBuffer,
       sizeBuffer,
+      svg
     } = this.state;
 
     if (reglRender && this.reglRenderState === "rendering" && mode !== "zoom") {
@@ -184,8 +216,6 @@ class Graph extends React.Component {
       );
     }
 
-    // If the viewport has changed size or this is the first time this
-    // component has updated...
     if (
       prevProps.responsive.height !== responsive.height ||
       prevProps.responsive.graphWidth !== responsive.graphWidth ||
@@ -201,11 +231,7 @@ class Graph extends React.Component {
         this.handleBrushDeselectAction.bind(this),
         responsive,
       );
-      dispatch({ type: 'toolBar.svg.resizeOrInit', value: newSvg })
-      dispatch({ type: 'toolBar.brush.resizeOrInit', value: brush })
-    }
-    if (prevProps.mode !== mode && mode === 'zoom') {
-      this.restartReglLoop();
+      this.setState({ svg: newSvg, brush });
     }
   }
 
@@ -221,34 +247,6 @@ class Graph extends React.Component {
       position: pointBuffer,
       count: this.count,
       view: camera.view()
-    });
-  }
-
-  restartReglLoop() {
-    const {
-      regl,
-      drawPoints,
-      sizeBuffer,
-      colorBuffer,
-      pointBuffer,
-      camera
-    } = this.state;
-    const reglRender = regl.frame(() => {
-      this.reglDraw(
-        regl,
-        drawPoints,
-        sizeBuffer,
-        colorBuffer,
-        pointBuffer,
-        camera
-      );
-      camera.tick();
-    });
-
-    this.reglRenderState = "rendering";
-
-    this.setState({
-      reglRender
     });
   }
 
@@ -311,6 +309,7 @@ class Graph extends React.Component {
 
   handleBrushDeselectAction() {
     const { dispatch } = this.props;
+
     if (!d3.event.selection) {
       dispatch({
         type: "graph brush deselect"

@@ -13,6 +13,7 @@ export default (
   handleBrushDeselectAction,
   responsive,
 ) => {
+  // TODO define brush first.
   const svg = d3
     .select("#graphAttachPoint")
     .append("svg")

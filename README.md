@@ -1,6 +1,9 @@
 # fork of cellxgene
 
-This is an experimental fork of [CZI's cellxgene](https://github.com/chanzuckerberg/cellxgene).
+This is an experimental fork of 
+[CZI's cellxgene](https://github.com/chanzuckerberg/cellxgene).
+
+To get a development environment up:
 
 Build the client web assets by calling this from inside the `cellxgene` folder
 
@@ -8,7 +11,7 @@ Build the client web assets by calling this from inside the `cellxgene` folder
 ./bin/build-client
 ```
 
-Install all requirements after python 3.6 is installed.
+Install all requirements after python 3.6, node and npm is installed.
 A virtual environment is recommended and shown here.
 
 ```
@@ -18,20 +21,17 @@ source $VENV/bin/activate
 pip install -e .
 ```
 
-One way to start the python server and the client app during development. The
-python server:
+Start it up:
 
 ```
-(be sure venv is sourced)
 cd cellxgene
+source $VENV/bin/activate
 cellxgene launch pbmc3k.h5ad
 ```
 
-The client in another terminal:
+Or launch in development mode:
 
 ```
-(be sure venv is sourced)
-cd cellxgene
-npm dev
+cd cellxgene/client
 npm start
 ```

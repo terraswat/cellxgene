@@ -8,7 +8,7 @@ import Container from "./framework/container";
 import LeftSideBar from "./leftsidebar";
 import Legend from "./continuousLegend";
 import Graph from "./graph/graph";
-import ToolBar from "./toolBar/toolBarLogic";
+import ToolBar from "./toolBar/logic";
 import actions from "../actions";
 
 @connect(state => ({

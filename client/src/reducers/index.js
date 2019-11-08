@@ -9,12 +9,14 @@ import config from "./config";
 import differential from "./differential";
 import responsive from "./responsive";
 import controls from "./controls";
+import toolBar from "../components/toolBar/toolBarState";
 
 const Reducer = combineReducers({
   config,
   responsive,
   controls,
-  differential
+  differential,
+  toolBar,
 });
 
 const store = createStore(
